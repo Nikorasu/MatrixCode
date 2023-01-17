@@ -59,7 +59,7 @@ class NonBlockingInput:
         self.oldsettings = termios.tcgetattr(sys.stdin)
         tty.setcbreak(sys.stdin) #.fileno()
         return self
-    def __exit__(self,type,val,tp):
+    def __exit__(self,type,val,tb):
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.oldsettings)
     def keypress(self):
         if select.select([sys.stdin],[],[],0) == ([sys.stdin],[],[]):
