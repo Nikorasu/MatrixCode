@@ -44,7 +44,7 @@ class NonBlockingInput:
         return self
     def __exit__(self,type,val,tp):
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.oldsettings)
-    def data(self):
+    def keypress(self):
         if select.select([sys.stdin],[],[],0) == ([sys.stdin],[],[]):
             return sys.stdin.read(1)
         return False
@@ -55,7 +55,7 @@ def main():
     print('\x1b[2J\x1b[?25l') # clear screen and hide cursor
     try:
         with NonBlockingInput() as nbi: # enables non-blocking input
-            while nbi.data() not in ('\x1b', 'q'): # main loop, press ESC or q to quit
+            while nbi.keypress() not in ('\x1b', 'q'): # main loop, press ESC or q to quit
                 termW = os.get_terminal_size().columns
                 for i in range(int(termW*DENSITY)-len(chains)): # fill Density% of the terminal width with MatrixColumns
                     while (column := random.randint(1,termW)) in taken: pass # ensures no overlappping columns (inefficient)

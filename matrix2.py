@@ -5,7 +5,7 @@
 
 DENSITY = 0.80 # percentage of terminal width to fill (default 0.80)
 MOVERATE = 0.08 # seconds between updates (default 0.08) lower is faster
-COLOR = 0 # HSV color for chains 1-360, 0 or None for randomized (Green is 120)
+COLOR = 120 # HSV color for chains 1-360, 0 or None for randomized (Green is 120)
 KANA = True # whether to include Japanese Katakana characters (default True)
 
 import random, os, string, time, sys, tty, termios, select
@@ -61,7 +61,7 @@ class NonBlockingInput:
         return self
     def __exit__(self,type,val,tp):
         termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.oldsettings)
-    def data(self):
+    def keypress(self):
         if select.select([sys.stdin],[],[],0) == ([sys.stdin],[],[]):
             return sys.stdin.read(1)
         return False
@@ -73,7 +73,7 @@ def main():
     print('\x1b[2J\x1b[?25l') # clear screen and hide cursor
     try:
         with NonBlockingInput() as nbi: # enables non-blocking input
-            while nbi.data() not in ('\x1b', 'q'): # main loop, press ESC or q to quit
+            while nbi.keypress() not in ('\x1b', 'q'): # main loop, press ESC or q to quit
                 FullCols = set(range(1,termW := os.get_terminal_size().columns+1)) # set of all columns, & store terminal width
                 if unused.union(taken) != FullCols: unused = FullCols-taken # accounts for terminal resizing
                 for i in range(int(termW*DENSITY)-len(chains)): # fill Density% of the terminal width with MatrixColumns
