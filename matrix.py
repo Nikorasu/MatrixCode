@@ -3,8 +3,8 @@
 # A basic Matrix code-rain terminal animation.
 # Copyright (C) 2022  Nik Stromberg - nikorasu85@gmail.com
 
-COLOR = ['\x1b[32m','\x1b[92m'] # green
-HIGHLIGHT = '\x1b[97m' # white
+COLOR = ['\x1b[32m','\x1b[92m'] # both greens for color variation
+LEADER = '\x1b[97m' # white for first character in chains
 DENSITY = 0.8 # percentage of terminal width to fill (default 0.8, max < 1.0)
 MOVERATE = 0.1 # seconds between updates (default 0.1) lower is faster
 KANA = True # whether to include Japanese Katakana characters (default True)
@@ -27,7 +27,7 @@ class MatrixColumn:
         termH = os.get_terminal_size().lines # get terminal height
         if 0 < self.start <= termH+2: # if start is on screen
             character = random.choice(self.characters) # choose a random character
-            print(f'{HIGHLIGHT}\x1b[{self.start};{self.column}H{character}',end='\b',flush=True)
+            print(f'{LEADER}\x1b[{self.start};{self.column}H{character}',end='\b',flush=True)
             print(f'{random.choice(COLOR)}\x1b[{self.start-1};{self.column}H{self.prechar}',end='\b',flush=True)
             if self.speed == 2: # if double speed
                 addchar = random.choice(self.characters) # choose an additional random character for double speed
