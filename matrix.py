@@ -5,7 +5,7 @@
 
 COLOR = ['\x1b[32m','\x1b[92m'] # green
 HIGHLIGHT = '\x1b[97m' # white
-DENSITY = 0.80 # percentage of terminal width to fill (default 0.80)
+DENSITY = 0.8 # percentage of terminal width to fill (default 0.8, max < 1.0)
 MOVERATE = 0.1 # seconds between updates (default 0.1) lower is faster
 KANA = True # whether to include Japanese Katakana characters (default True)
 

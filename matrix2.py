@@ -3,7 +3,7 @@
 # A Matrix code-rain terminal animation, with fade effect.
 # Copyright (C) 2022  Nik Stromberg - nikorasu85@gmail.com
 
-DENSITY = 0.80 # percentage of terminal width to fill (default 0.80)
+DENSITY = 0.9 # percentage of terminal width to fill (default 0.9, max 1.0)
 MOVERATE = 0.08 # seconds between updates (default 0.08) lower is faster
 COLOR = 0 # HSV color for chains 1-360, 0 or None for randomized (Green is 120)
 KANA = True # whether to include Japanese Katakana characters (default True)
