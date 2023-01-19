@@ -65,7 +65,7 @@ def main():
             oldsettings = termios.tcgetattr(sys.stdin)
             tty.setcbreak(sys.stdin)
         while True: # main loop
-            FullCols = set(range(1,termW := os.get_terminal_size().columns+1)) # set of all columns, & store terminal width
+            FullCols = set(range(1,(termW := os.get_terminal_size().columns)+1)) # set of all columns, & store terminal width
             if unused.union(taken) != FullCols: unused = FullCols-taken # accounts for terminal resizing
             for _ in range(int(termW*DENSITY)-len(chains)): # fill Density% of the terminal width with MatrixColumns
                 column = random.choice(list(unused)) # pick a random unused column
