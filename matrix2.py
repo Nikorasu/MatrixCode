@@ -5,19 +5,21 @@
 
 DENSITY = 0.80 # percentage of terminal width to fill (default 0.80)
 MOVERATE = 0.08 # seconds between updates (default 0.08) lower is faster
-COLOR = 120 # HSV color for chains 1-360, 0 or None for randomized (Green is 120)
+COLOR = 0 # HSV color for chains 1-360, 0 or None for randomized (Green is 120)
 KANA = True # whether to include Japanese Katakana characters (default True)
 
-import random, os, string, time, sys, tty, termios, select
+import random, os, string, time
+if os.name == 'nt': import msvcrt
+else: import sys, tty, termios, select
 
 class MatrixColumn:
     def __init__(self, column):
         self.column = column
         self.color = COLOR if COLOR else random.randint(1,360) # random color if COLOR is 0
-        self.start = -random.randint(0,os.get_terminal_size().lines) # random start position
-        self.end = random.randint(4,os.get_terminal_size().lines) # random end length
+        self.start = -random.randint(0, termH := os.get_terminal_size().lines) # random start position
+        self.end = random.randint(4, termH) # random end length, no bigger than terminal height
         self.speed = random.choice([1,1,2]) # 1/3 chance of double speed
-        kata = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ' if KANA else '' # katakana characters
+        kata = ''.join([chr(i) for i in range(0xFF71,0xFF9E)]) if KANA else '' #'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ'
         self.characters = string.printable.strip() + kata # possible characters to use
         self.chain = random.choices(self.characters,k=self.end) # randomize starting chain of characters
         self.done = False
@@ -54,42 +56,35 @@ def hsv2rgb(h, s, v): # convert HSV color values to RGB
     if i == 4: return (t, p, v)
     if i == 5: return (v, p, q)
 
-class NonBlockingInput:
-    def __enter__(self):
-        self.oldsettings = termios.tcgetattr(sys.stdin)
-        tty.setcbreak(sys.stdin) #.fileno()
-        return self
-    def __exit__(self,type,val,tb):
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.oldsettings)
-    def keypress(self):
-        if select.select([sys.stdin],[],[],0) == ([sys.stdin],[],[]):
-            return sys.stdin.read(1)
-        return False
-
 def main():
-    chains = []
-    taken = set()
-    unused = set(range(1,os.get_terminal_size().columns+1)) # set of unused columns
-    print('\x1b[2J\x1b[?25l') # clear screen and hide cursor
     try:
-        with NonBlockingInput() as nbi: # enables non-blocking input
-            while nbi.keypress() not in ('\x1b', 'q'): # main loop, press ESC or q to quit
-                FullCols = set(range(1,termW := os.get_terminal_size().columns+1)) # set of all columns, & store terminal width
-                if unused.union(taken) != FullCols: unused = FullCols-taken # accounts for terminal resizing
-                for i in range(int(termW*DENSITY)-len(chains)): # fill Density% of the terminal width with MatrixColumns
-                    column = random.choice(list(unused)) # pick a random unused column
-                    chains.append(MatrixColumn(column)) # create a new MatrixColumn in that column
-                    taken.add(column) # add column to taken set
-                    unused.remove(column) # remove column from unused set
-                for mcol in chains: # loop through all MatrixColumns
-                    mcol.update() # run update function in each MatrixColumn
-                    if mcol.done: # remove MatrixColumns when they finish falling
-                        taken.remove(mcol.column) # remove column from taken set
-                        if mcol.column <= termW: unused.add(mcol.column) # add now unused column back to unused set
-                        chains.remove(mcol) # remove finished MatrixColumn from list
-                time.sleep(MOVERATE) # controls the speed of the animation
+        chains, taken = [], set() # list of MatrixColumns, set of used columns
+        unused = set(range(1,os.get_terminal_size().columns+1)) # set of unused columns
+        print('\x1b[2J\x1b[?25l') # clear screen and hide cursor
+        if os.name == 'posix': # if on Linux       
+            oldsettings = termios.tcgetattr(sys.stdin)
+            tty.setcbreak(sys.stdin)
+        while True: # main loop
+            FullCols = set(range(1,termW := os.get_terminal_size().columns+1)) # set of all columns, & store terminal width
+            if unused.union(taken) != FullCols: unused = FullCols-taken # accounts for terminal resizing
+            for _ in range(int(termW*DENSITY)-len(chains)): # fill Density% of the terminal width with MatrixColumns
+                column = random.choice(list(unused)) # pick a random unused column
+                chains.append(MatrixColumn(column)) # create a new MatrixColumn in that column
+                taken.add(column) # add column to taken set
+                unused.remove(column) # remove column from unused set
+            for mcol in chains: # loop through all MatrixColumns
+                mcol.update() # run update function in each MatrixColumn
+                if mcol.done: # remove MatrixColumns when they finish falling
+                    taken.remove(mcol.column) # remove column from taken set
+                    if mcol.column <= termW: unused.add(mcol.column) # add now unused column back to unused set
+                    chains.remove(mcol) # remove finished MatrixColumn from list
+            time.sleep(MOVERATE) # controls the speed of the animation
+            if os.name == 'nt' and msvcrt.kbhit() and msvcrt.getch() in (b'\x1b', b'q'): break # ESC or q to quit
+            elif sys.stdin in select.select([sys.stdin],[],[],0)[0] and sys.stdin.read(1) in ('\x1b','q'): break
     except KeyboardInterrupt: pass # catch Ctrl+C
-    finally: print('\x1b[0m\x1b[2J\x1b[?25h') # reset terminal and show cursor
+    finally:
+        if os.name == 'posix': termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldsettings)
+        print('\x1b[0m\x1b[2J\x1b[?25h') # reset terminal and show cursor
 
 if __name__ == '__main__':
     main() # by Nik

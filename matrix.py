@@ -9,15 +9,17 @@ DENSITY = 0.80 # percentage of terminal width to fill (default 0.80)
 MOVERATE = 0.1 # seconds between updates (default 0.1) lower is faster
 KANA = True # whether to include Japanese Katakana characters (default True)
 
-import random, os, string, time, sys, tty, termios, select
+import random, os, string, time
+if os.name == 'nt': import msvcrt
+else: import sys, tty, termios, select
 
 class MatrixColumn:
     def __init__(self, column):
         self.column = column
-        self.start = -random.randint(0,os.get_terminal_size().lines) # random start position
-        self.end = self.start-random.randint(3,os.get_terminal_size().lines) # random end position
+        self.start = -random.randint(0, termH := os.get_terminal_size().lines) # random start position
+        self.end = self.start-random.randint(3, termH) # random end length, no bigger than terminal height
         self.speed = random.choice([1,1,2]) # 1/3 chance of double speed
-        kata = 'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ' if KANA else '' # katakana characters
+        kata = ''.join([chr(i) for i in range(0xFF71,0xFF9E)]) if KANA else '' #'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ'
         self.characters = string.printable.strip() + kata # possible characters to use
         self.prechar = ''
         self.done = False
@@ -40,15 +42,15 @@ class MatrixColumn:
         if self.end > termH: self.done = True # if end is off screen
 
 def main():
-    running, chains = True, []
-    taken = set() # set of unused columns
-    print('\x1b[2J\x1b[?25l') # clear screen and hide cursor
     try:
-        oldsettings = termios.tcgetattr(sys.stdin)
-        tty.setcbreak(sys.stdin)
-        while running: # main loop
+        chains, taken = [], set() # list for MatrixColumns, set for taken columns
+        print('\x1b[2J\x1b[?25l') # clear screen and hide cursor
+        if os.name == 'posix': # if on Linux       
+            oldsettings = termios.tcgetattr(sys.stdin)
+            tty.setcbreak(sys.stdin)
+        while True: # main loop
             termW = os.get_terminal_size().columns
-            for i in range(int(termW*DENSITY)-len(chains)): # fill Density% of the terminal width with MatrixColumns
+            for _ in range(int(termW*DENSITY)-len(chains)): # fill Density% of the terminal width with MatrixColumns
                 while (column := random.randint(1,termW)) in taken: pass # prevents overlapping columns, inefficient
                 chains.append(MatrixColumn(column)) # spawn MatrixColumn at unused column, add to list for updating
                 taken.add(column) # add column to taken set
@@ -58,11 +60,11 @@ def main():
                     taken.remove(mcol.column) # remove column from taken set
                     chains.remove(mcol) # then remove it from update list
             time.sleep(MOVERATE) # controls the speed of the animation
-            if select.select([sys.stdin],[],[],0) == ([sys.stdin],[],[]): # check for input
-                if sys.stdin.read(1) in ('\x1b', 'q'): running = False # quit if ESC or q was pressed
+            if os.name == 'nt' and msvcrt.kbhit() and msvcrt.getch() in (b'\x1b', b'q'): break # ESC or q to quit
+            elif sys.stdin in select.select([sys.stdin],[],[],0)[0] and sys.stdin.read(1) in ('\x1b','q'): break
     except KeyboardInterrupt: pass # catch Ctrl+C
     finally:
-        termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldsettings)
+        if os.name == 'posix': termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldsettings)
         print('\x1b[0m\x1b[2J\x1b[?25h') # reset terminal and show cursor
 
 if __name__ == '__main__':
