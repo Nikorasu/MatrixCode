@@ -61,7 +61,7 @@ def main():
                     chains.remove(mcol) # then remove it from update list
             time.sleep(MOVERATE) # controls the speed of the animation
             if os.name == 'nt' and msvcrt.kbhit() and msvcrt.getch() in (b'\x1b', b'q'): break # ESC or q to quit
-            elif sys.stdin in select.select([sys.stdin],[],[],0)[0] and sys.stdin.read(1) in ('\x1b','q'): break
+            elif os.name == 'posix' and sys.stdin in select.select([sys.stdin],[],[],0)[0] and sys.stdin.read(1) in ('\x1b','q'): break
     except KeyboardInterrupt: pass # catch Ctrl+C
     finally:
         if os.name == 'posix': termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldsettings)
