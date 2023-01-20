@@ -29,14 +29,14 @@ class MatrixColumn:
             newchar = random.choice(['','','\x1b[1m','\x1b[2m']) + random.choice(self.characters) # new character with random bold
             print(f'\x1b[97m\x1b[{self.start};{self.column}H{newchar}',end='\x1b[0m\b',flush=True) #x1b[38;2;255;255;255m
             for i, char in enumerate(self.chain): # loop through all characters
-                if self.start-i-1 > 0: # if characters are on screen
+                if termH >= self.start-i-1 > 0: # if characters are on screen
                     brightness = 1-(i/self.end)**2 if i < self.end else 0 # calculate brightness based on position in chain
                     r, g, b = hsv2rgb(self.color,1,brightness) # convert HSV to RGB for color fade
                     print(f'\x1b[38;2;{int(r)};{int(g)};{int(b)}m\x1b[{self.start-i-1};{self.column}H{char}',end='\x1b[0m\b',flush=True)
             self.chain.insert(0,newchar) # insert newchar at start of chain
             if self.speed == 2: # if this chain is double speed
                 addchar = random.choice(self.characters) # pick an additional character for double speed
-                self.chain.insert(1,random.choice(['','','\x1b[1m','\x1b[2m']) + addchar) # add it with random formatting
+                self.chain.insert(0,random.choice(['','','\x1b[1m','\x1b[2m']) + addchar) # add it with random formatting
             self.chain = self.chain[:self.end] # trim list to end length
             self.chain.extend([' ',' ']) # add 2 blank spaces to end of chain, to erase old characters when printed
         self.start += self.speed # move start position down by speed amount, to animate
