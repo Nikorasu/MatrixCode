@@ -19,7 +19,7 @@ class MatrixColumn:
         self.start = -random.randint(0, termH := os.get_terminal_size().lines) # random start position
         self.end = self.start-random.randint(3, termH) # random end length, no bigger than terminal height
         self.speed = random.choice([1,1,2]) # 1/3 chance of double speed
-        kata = ''.join([chr(i) for i in range(0xFF71,0xFF9E)]) if KANA else '' #'ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜｦﾝ'
+        kata = ''.join([chr(i) for i in range(0xFF71,0xFF9E)]) if KANA else '' # Katakana characters
         self.characters = string.printable.strip() + kata # possible characters to use
         self.prechar = ''
         self.done = False
@@ -45,7 +45,7 @@ def main():
     try:
         chains, taken = [], set() # list for MatrixColumns, set for taken columns
         print('\x1b[2J\x1b[?25l') # clear screen and hide cursor
-        if os.name == 'posix': # if on Linux       
+        if os.name == 'posix': # if on Linux
             oldsettings = termios.tcgetattr(sys.stdin)
             tty.setcbreak(sys.stdin)
         while True: # main loop
