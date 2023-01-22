@@ -8,13 +8,14 @@ MOVERATE = 0.08 # seconds between updates (default 0.08) lower is faster
 COLOR = 0 # HSV color for chains 1-360, 0 or None for randomized (Green is 120)
 KANA = True # whether to include Japanese Katakana characters (default True)
 
-import random, os, string, time
-if os.name == 'nt': import msvcrt
-else: import sys, tty, termios, select
+import random, string, os, time, sys # for randomization, terminal size, timing, arguments & input
+if os.name == 'nt': import msvcrt # for Windows keyboard input
+else: import termios, tty, select # for Linux keyboard input
+if len(sys.argv[1:]): COLOR = int(sys.argv[1]) # if a color is passed as an argument, use it
 
 class MatrixColumn:
     def __init__(self, column):
-        self.column = column
+        self.column = column # store column number for this chain to print at
         self.color = COLOR if COLOR else random.randint(1,360) # random color if COLOR is 0
         self.start = -random.randint(0, termH := os.get_terminal_size().lines) # random start position
         self.end = random.randint(4, termH) # random end length, no bigger than terminal height
@@ -22,7 +23,7 @@ class MatrixColumn:
         kata = ''.join([chr(i) for i in range(0xFF71,0xFF9E)]) if KANA else '' # Katakana characters
         self.characters = string.printable.strip() + kata # possible characters to use
         self.chain = random.choices(self.characters,k=self.end) # randomize starting chain of characters
-        self.done = False
+        self.done = False # when the chain has moved off screen, this is used to remove it
     def update(self):
         termH = os.get_terminal_size().lines # get terminal height
         if 0 < self.start <= termH+len(self.chain): # if start is on screen
@@ -62,8 +63,8 @@ def main():
         unused = set(range(1,os.get_terminal_size().columns+1)) # set of unused columns
         print('\x1b[2J\x1b[?25l') # clear screen and hide cursor
         if os.name == 'posix': # if on Linux
-            oldsettings = termios.tcgetattr(sys.stdin)
-            tty.setcbreak(sys.stdin)
+            oldsettings = termios.tcgetattr(sys.stdin) # store old terminal settings
+            tty.setcbreak(sys.stdin) # set terminal to cbreak mode (so input doesn't wait for enter)
         while True: # main loop
             FullCols = set(range(1,(termW := os.get_terminal_size().columns)+1)) # set of all columns, & store terminal width
             if unused.union(taken) != FullCols: unused = FullCols-taken # accounts for terminal resizing
@@ -82,8 +83,8 @@ def main():
             if os.name == 'nt' and msvcrt.kbhit() and msvcrt.getch() in (b'\x1b', b'q'): break # ESC or q to quit
             elif os.name == 'posix' and sys.stdin in select.select([sys.stdin],[],[],0)[0] and sys.stdin.read(1) in ('\x1b','q'): break
     except KeyboardInterrupt: pass # catch Ctrl+C
-    finally:
-        if os.name == 'posix': termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldsettings)
+    finally: # ensures these run even if program is interrupted, so terminal functions properly on exit
+        if os.name == 'posix': termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldsettings) # restore terminal settings
         print('\x1b[0m\x1b[2J\x1b[?25h') # reset terminal and show cursor
 
 if __name__ == '__main__':
