@@ -32,10 +32,10 @@ class MatrixColumn:
             self.chain = self.chain[:self.end] # trim list to end length
             self.chain.extend([' ']*self.speed) # add blank spaces to end of chain, to erase old characters when printed
             for i, char in enumerate(self.chain): # loop through all characters
-                if termH >= self.start-i-1 > 0: # if characters are on screen
+                if termH >= self.start-i > 0: # if characters are on screen
                     brightness = 1-(i/self.end)**2 if i < self.end else 0 # calculate brightness based on position in chain
                     r, g, b = hsv2rgb(self.color,bool(i),brightness) # convert HSV to RGB for color fade
-                    print(f'\x1b[38;2;{int(r)};{int(g)};{int(b)}m\x1b[{self.start-i-1};{self.column}H{char}',end='\x1b[0m\b',flush=True)
+                    print(f'\x1b[38;2;{int(r)};{int(g)};{int(b)}m\x1b[{self.start-i};{self.column}H{char}',end='\x1b[0m\b',flush=True)
         self.start += self.speed # move start position down by speed amount, to animate
         if self.start-len(self.chain) > termH: self.done = True # if end is off screen, mark as done, for removal
 
