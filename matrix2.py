@@ -28,7 +28,7 @@ class MatrixColumn:
         termH = os.get_terminal_size().lines # get terminal height
         if 0 < self.start <= termH+len(self.chain): # if start is on screen
             newchar = random.choice(['','','\x1b[1m','\x1b[2m']) + random.choice(self.characters) # new character with random bold
-            print(f'\x1b[97m\x1b[{self.start};{self.column}H{newchar}',end='\x1b[0m\b',flush=True) #x1b[38;2;255;255;255m
+            if self.start<=termH: print(f'\x1b[97m\x1b[{self.start};{self.column}H{newchar}',end='\x1b[0m\b',flush=True) #x1b[38;2;255;255;255m
             for i, char in enumerate(self.chain): # loop through all characters
                 if termH >= self.start-i-1 > 0: # if characters are on screen
                     brightness = 1-(i/self.end)**2 if i < self.end else 0 # calculate brightness based on position in chain
