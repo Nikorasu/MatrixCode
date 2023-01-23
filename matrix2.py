@@ -19,7 +19,7 @@ class MatrixColumn:
         self.color = COLOR if COLOR else random.randint(1,360) # random color if COLOR is 0
         self.start = -random.randint(0, termH := os.get_terminal_size().lines) # random start position
         self.end = random.randint(4, termH) # random end length, no bigger than terminal height
-        self.speed = random.choice([1,1,2]) # 1/3 chance of double speed
+        self.speed = random.choices((1,2,3),cum_weights=(1,1.4,1.42))[0] # random speed, weighted towards 1
         kata = ''.join([chr(i) for i in range(0xFF71,0xFF9E)]) if KANA else '' # Katakana characters
         self.characters = string.printable.strip() + kata # possible characters to use
         self.chain = random.choices(self.characters,k=self.end) # randomize starting chain of characters
@@ -27,19 +27,15 @@ class MatrixColumn:
     def update(self):
         termH = os.get_terminal_size().lines # get terminal height
         if 0 < self.start <= termH+len(self.chain): # if start is on screen
-            newchar = random.choice(['','','\x1b[1m','\x1b[2m']) + random.choice(self.characters) # new character with random bold
-            if self.start<=termH: print(f'\x1b[97m\x1b[{self.start};{self.column}H{newchar}',end='\x1b[0m\b',flush=True) #x1b[38;2;255;255;255m
+            for _ in range(self.speed): # loop for each speed
+                self.chain.insert(0,random.choice(('','','\x1b[1m','\x1b[2m')) + random.choice(self.characters)) #add with random bold
+            self.chain = self.chain[:self.end] # trim list to end length
+            self.chain.extend([' ']*self.speed) # add blank spaces to end of chain, to erase old characters when printed
             for i, char in enumerate(self.chain): # loop through all characters
                 if termH >= self.start-i-1 > 0: # if characters are on screen
                     brightness = 1-(i/self.end)**2 if i < self.end else 0 # calculate brightness based on position in chain
-                    r, g, b = hsv2rgb(self.color,1,brightness) # convert HSV to RGB for color fade
+                    r, g, b = hsv2rgb(self.color,bool(i),brightness) # convert HSV to RGB for color fade
                     print(f'\x1b[38;2;{int(r)};{int(g)};{int(b)}m\x1b[{self.start-i-1};{self.column}H{char}',end='\x1b[0m\b',flush=True)
-            self.chain.insert(0,newchar) # insert newchar at start of chain
-            if self.speed == 2: # if this chain is double speed
-                addchar = random.choice(self.characters) # pick an additional character for double speed
-                self.chain.insert(0,random.choice(['','','\x1b[1m','\x1b[2m']) + addchar) # add it with random formatting
-            self.chain = self.chain[:self.end] # trim list to end length
-            self.chain.extend([' ',' ']) # add 2 blank spaces to end of chain, to erase old characters when printed
         self.start += self.speed # move start position down by speed amount, to animate
         if self.start-len(self.chain) > termH: self.done = True # if end is off screen, mark as done, for removal
 
