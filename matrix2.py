@@ -28,13 +28,13 @@ class MatrixColumn:
         termH = os.get_terminal_size().lines # get terminal height
         if 0 < self.start <= termH+len(self.chain): # if chain is on screen
             for _ in range(self.speed): # depending on speed, add characters to start of chain
-                self.chain.insert(0,random.choice(('','','\x1b[1m','\x1b[2m')) + random.choice(self.characters)) # with random bold
+                self.chain.insert(0, random.choice(('','','\x1b[1m','\x1b[2m')) + random.choice(self.characters)) # with random bold
             self.chain = self.chain[:self.end] # trim list to end length
             self.chain.extend([' ']*self.speed) # add blank spaces to end of chain, to erase old characters when printed
             for i, char in enumerate(self.chain): # loop through all characters
                 if termH >= self.start-i > 0: # if currrent character is on screen
                     brightness = 1-(i/self.end)**2 if i < self.end else 0 # calculate brightness based on position in chain
-                    r, g, b = hsv2rgb(self.color,bool(i),brightness) # convert HSV to RGB for color fade
+                    r, g, b = hsv2rgb(self.color, bool(i), brightness) # convert HSV to RGB for color fade
                     print(f'\x1b[38;2;{int(r)};{int(g)};{int(b)}m\x1b[{self.start-i};{self.column}H{char}',end='\x1b[0m\b',flush=True)
         self.start += self.speed # move start position down by speed amount, to animate
         if self.start-len(self.chain) > termH: self.done = True # if end is off screen, mark as done, for removal
@@ -76,7 +76,7 @@ def main():
                     if mcol.column <= termW: unused.add(mcol.column) # add now unused column back to unused set
                     chains.remove(mcol) # remove finished MatrixColumn from list
             time.sleep(MOVERATE) # controls the speed of the animation
-            if os.name == 'nt' and msvcrt.kbhit() and msvcrt.getch() in (b'\x1b', b'q'): break # ESC or q to quit
+            if os.name == 'nt' and msvcrt.kbhit() and msvcrt.getch() in (b'\x1b',b'q'): break # ESC or q to quit
             elif os.name == 'posix' and sys.stdin in select.select([sys.stdin],[],[],0)[0] and sys.stdin.read(1) in ('\x1b','q'): break
     except KeyboardInterrupt: pass # catch Ctrl+C
     finally: # ensures these run even if program is interrupted, so terminal functions properly on exit
