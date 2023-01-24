@@ -26,13 +26,13 @@ class MatrixColumn:
         self.done = False # when the chain has moved off screen, this is used to remove it
     def update(self):
         termH = os.get_terminal_size().lines # get terminal height
-        if 0 < self.start <= termH+len(self.chain): # if start is on screen
-            for _ in range(self.speed): # loop for each speed
-                self.chain.insert(0,random.choice(('','','\x1b[1m','\x1b[2m')) + random.choice(self.characters)) #add with random bold
+        if 0 < self.start <= termH+len(self.chain): # if chain is on screen
+            for _ in range(self.speed): # depending on speed, add characters to start of chain
+                self.chain.insert(0,random.choice(('','','\x1b[1m','\x1b[2m')) + random.choice(self.characters)) # with random bold
             self.chain = self.chain[:self.end] # trim list to end length
             self.chain.extend([' ']*self.speed) # add blank spaces to end of chain, to erase old characters when printed
             for i, char in enumerate(self.chain): # loop through all characters
-                if termH >= self.start-i > 0: # if characters are on screen
+                if termH >= self.start-i > 0: # if currrent character is on screen
                     brightness = 1-(i/self.end)**2 if i < self.end else 0 # calculate brightness based on position in chain
                     r, g, b = hsv2rgb(self.color,bool(i),brightness) # convert HSV to RGB for color fade
                     print(f'\x1b[38;2;{int(r)};{int(g)};{int(b)}m\x1b[{self.start-i};{self.column}H{char}',end='\x1b[0m\b',flush=True)
