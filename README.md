@@ -5,19 +5,23 @@ as seen in the movie "The Matrix".
 It doesn't use the curses library, and should work on both Windows and Linux.
 If your terminal can't display unicode characters, set KANA to False.
 
-The file `matrix.py` is my original simple method, which merely prints random
-characters in columns, without saving them, then prints blank spaces a certain
-distance above, to erase them as it animates down. It uses the terminal default
+## `matrix.py`
+
+This was my original simple method, which merely prints random characters in
+columns, without storing them, then prints empty spaces a randomly set distance
+above the start, to erase as it animates down. It uses the terminal default
 colors for dark green, bright green, & white. Tho those can be customized, and
 I also added a few other configurable options to the top of the files.
 
-`matrix2.py` is more advanced, has a nice fade-effect, supports custom colors,
-and even has a random color rainbow-mode. Color is specified using HSV hue
+## `matrix2.py`
+
+More advanced version, has a nice fade-effect, supports custom colors, and even
+has a random color rainbow-mode. The color can be specified using HSV hue
 values _(1-360)_, either by editing the COLOR setting on line 8, or from the
 terminal as an argument when running the code. Any integer from 1 to 360 is
 valid, 0 is reserved for the random color mode. Default is 120 for Green.
 Other common colors:
-> Orange = 30, Yellow = 60, Blue = 240, Purple = 27, Pink = 300, Red = 360
+> Orange = 30, Yellow = 60, Blue = 240, Purple = 270, Pink = 300, Red = 360
 
 So in order to change the color to Blue, run using: `python matrix2.py 240`
 
