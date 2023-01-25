@@ -17,7 +17,11 @@ values _(1-360)_, either by editing the COLOR setting on line 8, or from the
 terminal as an argument when running the code. Any integer from 1 to 360 is
 valid, 0 is reserved for the random color mode. Default is 120 for Green.
 Other common colors:
-Orange = 30, Yellow = 60, Blue = 240, Purple = 27, Pink = 300, Red = 360.
+> Orange = 30, Yellow = 60, Blue = 240, Purple = 27, Pink = 300, Red = 360
+
+So in order to change the color to Blue, run using: `python matrix2.py 240`
+
+Or to use the random color mode, run using: `python matrix2.py 0`
 
 ---
 
