@@ -44,7 +44,7 @@ class MatrixColumn:
 def main():
     try:
         chains, taken = [], set() # list for MatrixColumns, set for taken columns
-        print('\x1b[2J\x1b[?25l') # clear screen and hide cursor
+        print('\x1b[2J\x1b[?25l\x1b]0;The Matrix',end='\a',flush=True) # clear screen, hide cursor, & set window title
         if os.name == 'posix': # if on Linux
             oldsettings = termios.tcgetattr(sys.stdin)
             tty.setcbreak(sys.stdin)

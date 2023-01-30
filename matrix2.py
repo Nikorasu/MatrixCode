@@ -57,7 +57,7 @@ def main():
     try:
         chains, taken = [], set() # list of MatrixColumns, set of used columns
         unused = set(range(1,os.get_terminal_size().columns+1)) # set of unused columns
-        print('\x1b[2J\x1b[?25l') # clear screen and hide cursor
+        print('\x1b[2J\x1b[?25l\x1b]0;The Matrix',end='\a',flush=True) # clear screen, hide cursor, & set window title
         if os.name == 'posix': # if on Linux
             oldsettings = termios.tcgetattr(sys.stdin) # store old terminal settings
             tty.setcbreak(sys.stdin) # set terminal to cbreak mode (so input doesn't wait for enter)
