@@ -81,7 +81,7 @@ def main():
     except KeyboardInterrupt: pass # catch Ctrl+C
     finally: # ensures these run even if program is interrupted, so terminal functions properly on exit
         if os.name == 'posix': termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldsettings) # restore terminal settings
-        print('\x1b[0m\x1b[2J\x1b[?25h') # reset terminal and show cursor
+        print('\x1b[0m\x1b[2J\x1b[H\x1b[?25h') # reset terminal and show cursor
 
 if __name__ == '__main__':
     main() # by Nik

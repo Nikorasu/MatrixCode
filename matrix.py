@@ -65,7 +65,7 @@ def main():
     except KeyboardInterrupt: pass # catch Ctrl+C
     finally:
         if os.name == 'posix': termios.tcsetattr(sys.stdin, termios.TCSADRAIN, oldsettings)
-        print('\x1b[0m\x1b[2J\x1b[?25h') # reset terminal and show cursor
+        print('\x1b[0m\x1b[2J\x1b[H\x1b[?25h') # reset terminal and show cursor
 
 if __name__ == '__main__':
     main() # by Nik
