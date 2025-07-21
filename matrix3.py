@@ -36,7 +36,7 @@ class MatrixColumn:
                 if random.random() < 0.002 and char.strip():
                     prefix = ''
                     if char.startswith('\x1b[1m') or char.startswith('\x1b[2m'):
-                        prefix, _ = char[:4], char[4:]
+                        prefix = char[:4] #, char[4:] , _ 
                     self.chain[i] = prefix + random.choice(self.characters)
                 if termH >= self.start-i > 0: # if currrent character is on screen
                     brightness = 1-(i/self.end)**2 if i < self.end else 0 # calculate brightness based on position in chain
