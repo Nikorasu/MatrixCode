@@ -7,6 +7,7 @@ DENSITY = 0.9 # percentage of terminal width to fill (default 0.9, max 1.0)
 MOVERATE = 0.08 # seconds between updates (default 0.08) lower is faster
 COLOR = 120 # HSV color for chains 1-360, 0 or None for randomized (Green is 120)
 KANA = True # whether to include Japanese Katakana characters (default True)
+ERASE = False # clear characters after end of chains for clean background (default False)
 
 import random, string, os, time, sys # for randomization, terminal size, timing, arguments & input
 if os.name == 'nt': import msvcrt # for Windows keyboard input
@@ -30,7 +31,7 @@ class MatrixColumn:
             for _ in range(self.speed): # using speed to track location, add random bold/dim characters
                 self.chain.insert(0, random.choices(('','\x1b[1m','\x1b[2m'), weights=(4,1,1))[0] + random.choice(self.characters))
             self.chain = self.chain[:self.end] # trim list to end length
-            self.chain.extend([' ']*self.speed) # add blank spaces to end of chain, to erase old characters when printed
+            if ERASE: self.chain.extend([' ']*self.speed) # add blank to end of chain, to clear chain ghosts
             for i, char in enumerate(self.chain): # loop through all characters
                 # Rarely flip a character (e.g., 0.1% chance per character per update)
                 if random.random() < 0.002 and char.strip():
